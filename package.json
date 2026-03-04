@@ -1,0 +1,22 @@
+{
+  "name": "jianli-xiugai-shenqi",
+  "productName": "简历修改神器",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k \"vite\" \"node server/server.js\"",
+    "build": "vite build",
+    "start": "NODE_ENV=production node server/server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.1",
+    "express": "^4.19.2",
+    "pdfjs-dist": "^4.5.136",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^9.0.1",
+    "vite": "^5.4.2"
+  }
+}
