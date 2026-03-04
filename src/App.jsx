@@ -38,6 +38,8 @@ async function parsePdf(file) {
 export default function App() {
   const [mode, setMode] = useState('login');
   const [authError, setAuthError] = useState('');
+  const [authSuccess, setAuthSuccess] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
   const [userId, setUserId] = useState(() => Number(localStorage.getItem('userId')) || 0);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -71,36 +73,59 @@ export default function App() {
     return jdText.trim().length > 20 && resumeText.trim().length > 50 && apiKey.trim().length > 10;
   }, [jdText, resumeText, apiKey]);
 
+  const switchMode = (nextMode) => {
+    setMode(nextMode);
+    setAuthError('');
+    setAuthSuccess('');
+  };
+
   const handleRegister = async () => {
     setAuthError('');
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    }).then(r => r.json());
+    setAuthSuccess('');
+    setAuthLoading(true);
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      }).then(r => r.json());
 
-    if (!res.ok) {
-      setAuthError(res.error || '注册失败');
-      return;
+      if (!res.ok) {
+        setAuthError(res.error || '注册失败');
+        return;
+      }
+
+      setAuthSuccess('注册成功，请切换到登录并输入同样账号密码。');
+      setMode('login');
+    } catch {
+      setAuthError('注册失败，请稍后重试');
+    } finally {
+      setAuthLoading(false);
     }
-    localStorage.setItem('userId', String(res.userId));
-    setUserId(res.userId);
   };
 
   const handleLogin = async () => {
     setAuthError('');
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    }).then(r => r.json());
+    setAuthSuccess('');
+    setAuthLoading(true);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      }).then(r => r.json());
 
-    if (!res.ok) {
-      setAuthError(res.error || '登录失败');
-      return;
+      if (!res.ok) {
+        setAuthError(res.error || '登录失败');
+        return;
+      }
+      localStorage.setItem('userId', String(res.userId));
+      setUserId(res.userId);
+    } catch {
+      setAuthError('登录失败，请稍后重试');
+    } finally {
+      setAuthLoading(false);
     }
-    localStorage.setItem('userId', String(res.userId));
-    setUserId(res.userId);
   };
 
   const handleLogout = () => {
@@ -173,8 +198,8 @@ export default function App() {
         </header>
         <div className="auth-card">
           <div className="auth-tabs">
-            <button className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>登录</button>
-            <button className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')}>注册</button>
+            <button className={mode === 'login' ? 'active' : ''} onClick={() => switchMode('login')}>登录</button>
+            <button className={mode === 'register' ? 'active' : ''} onClick={() => switchMode('register')}>注册</button>
           </div>
           <div className="auth-form">
             <label>用户名</label>
@@ -182,10 +207,15 @@ export default function App() {
             <label>密码</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="至少6位" />
             {authError && <div className="error">{authError}</div>}
+            {authSuccess && <div className="success">{authSuccess}</div>}
             {mode === 'login' ? (
-              <button className="primary" onClick={handleLogin}>登录</button>
+              <button className="primary" disabled={authLoading} onClick={handleLogin}>
+                {authLoading ? '处理中...' : '登录'}
+              </button>
             ) : (
-              <button className="primary" onClick={handleRegister}>注册</button>
+              <button className="primary" disabled={authLoading} onClick={handleRegister}>
+                {authLoading ? '处理中...' : '注册'}
+              </button>
             )}
           </div>
         </div>

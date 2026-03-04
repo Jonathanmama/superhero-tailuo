@@ -168,6 +168,11 @@ button:disabled {
   font-size: 13px;
 }
 
+.success {
+  color: #067647;
+  font-size: 13px;
+}
+
 .hint {
   color: var(--muted);
   font-size: 12px;
