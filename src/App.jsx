@@ -1,8 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
-import pdfWorker from 'pdfjs-dist/legacy/build/pdf.worker.min.js?url';
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 const industries = [
   '互联网/软件',
@@ -26,7 +23,7 @@ const defaultApiBase = 'https://dashscope.aliyuncs.com/compatible-mode';
 
 async function parsePdf(file) {
   const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer, disableWorker: true }).promise;
   const maxPages = pdf.numPages;
   const texts = [];
   for (let i = 1; i <= maxPages; i += 1) {
